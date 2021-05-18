@@ -1,8 +1,10 @@
-use std::{error::Error, fs::File, io::Write, path::Path};
-
-use gtk::prelude::*;
+use gdk::EventKey;
+use gtk::CellAreaExt;
+use gtk::{false_, prelude::*};
+use std::rc::Rc;
+use std::{borrow::Borrow, error::Error, fs::File, io::Write, path::Path};
 mod source;
-
+use glib::clone;
 fn download_image(url: &str, dst: &str) -> Result<(), Box<dyn Error>> {
     let response = reqwest::blocking::Client::new().get(url);
     let path = Path::new(dst);
@@ -38,8 +40,8 @@ fn set_wallpaper(script_path: &str, image_path: &str) -> Result<i32, std::io::Er
 #[test]
 fn test_set_wallpaper() {
     let status = set_wallpaper(
-        "shell/gsettings.sh",
-        "file:///home/nealian/desktop_new/wallpaper/test.jpg",
+        "/home/nealian/desktop_new/wallpaper/shell/gsettings.sh",
+        "/home/nealian/desktop_new/wallpaper/test.jpg",
     )
     .unwrap();
     assert_eq!(status, 0);
@@ -54,19 +56,31 @@ fn main() {
     // Then we call the Builder call.
     let builder = gtk::Builder::from_string(glade_src);
     let window: gtk::Window = builder.get_object("window").unwrap();
-    // for i in 1..=9 {
-    //     let image: gtk::Image = builder.get_object(&format!("image{}", i)).unwrap();
-    //     if let Ok(pixbuf) = gdk_pixbuf::Pixbuf::from_file_at_scale(
-    //         "/home/nealian/图片/30000000000243828_1920x1080.jpg",
-    //         192,
-    //         108,
-    //         false,
-    //     ) {
-    //         image.set_from_pixbuf(Some(&pixbuf));
-    //     }
-    // }
+    let search_bar: gtk::SearchBar = builder.get_object("search_bar").unwrap();
 
     window.show_all();
+    let search_entry: gtk::SearchEntry = builder.get_object("search_entry").unwrap();
+    // let search_bar = &search_bar;
+    // search_entry.connect_key_press_event(move |x, e| {
+    //     match e.get_keyval() {
+    //         gdk::keys::constants::Return => {
+    //             println!("do search");
+    //         }
+    //         gdk::keys::constants::Escape => {
+    //             search_bar.hide();
+    //         }
+    //         _ => {}
+    //     }
+    //     return Inhibit(false);
+    // });
+    let btn_open_search: gtk::Button = builder.get_object("btn_open_search").unwrap();
+    btn_open_search.connect_clicked(clone!(@weak search_bar => move |_| {
+        if search_bar.get_visible() {
+            search_bar.hide();
+        } else {
+            search_bar.show();
+        }
+    }));
     window.connect_destroy(|_| std::process::exit(0));
     // We start the gtk main loop.
     gtk::main();

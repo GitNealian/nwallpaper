@@ -33,10 +33,9 @@
   </object>
   <object class="GtkDialog">
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">首选项</property>
     <property name="modal">True</property>
     <property name="type_hint">dialog</property>
-    <child>
+    <child type="titlebar">
       <placeholder/>
     </child>
     <child internal-child="vbox">
@@ -430,17 +429,16 @@
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkSearchBar">
-            <property name="visible">True</property>
+          <object class="GtkSearchBar" id="search_bar">
             <property name="can_focus">False</property>
+            <property name="no_show_all">True</property>
             <property name="search_mode_enabled">True</property>
-            <property name="show_close_button">True</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkSearchEntry">
+                  <object class="GtkSearchEntry" id="search_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="primary_icon_name">edit-find-symbolic</property>
@@ -491,12 +489,13 @@
                 <property name="can_focus">False</property>
                 <property name="layout_style">center</property>
                 <child>
-                  <object class="GtkToggleButton">
+                  <object class="GtkRadioButton" id="radio_online">
                     <property name="label" translatable="yes">在线</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="receives_default">False</property>
                     <property name="active">True</property>
+                    <property name="draw_indicator">False</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -505,11 +504,13 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton">
+                  <object class="GtkRadioButton" id="radio_local">
                     <property name="label" translatable="yes">本地</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="draw_indicator">False</property>
+                    <property name="group">radio_online</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -518,11 +519,14 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToggleButton">
+                  <object class="GtkRadioButton" id="radio_color">
                     <property name="label" translatable="yes">颜色</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">False</property>
+                    <property name="group">radio_local</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -546,7 +550,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkComboBoxText">
+                  <object class="GtkComboBoxText" id="cbx_sources">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="active">0</property>
@@ -563,7 +567,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton">
+                  <object class="GtkButton" id="btn_refresh">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -581,7 +585,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton">
+                  <object class="GtkButton" id="btn_open_search">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -644,7 +648,7 @@
                             <property name="pixbuf">../../../20000000000251820_1920x1080.jpg</property>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
+                            <property name="expand">True</property>
                             <property name="fill">True</property>
                             <property name="position">0</property>
                           </packing>
@@ -656,7 +660,7 @@
                             <property name="pixbuf">../../../20000000000251820_1920x1080.jpg</property>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
+                            <property name="expand">True</property>
                             <property name="fill">True</property>
                             <property name="position">1</property>
                           </packing>
@@ -668,7 +672,7 @@
                             <property name="pixbuf">../../../20000000000251820_1920x1080.jpg</property>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
+                            <property name="expand">True</property>
                             <property name="fill">True</property>
                             <property name="position">2</property>
                           </packing>
