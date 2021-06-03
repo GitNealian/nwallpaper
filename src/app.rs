@@ -3,11 +3,13 @@ use glib::clone;
 use glib::{Receiver, Sender};
 use gtk::{prelude::*, ApplicationWindow, Builder};
 use std::{cell::RefCell, rc::Rc};
-
+use super::source::Source;
+use std::thread;
 pub(crate) enum Action {
     SwitchOnline,
     SwitchLocal,
     SwitchColor,
+    ShowImage(String, i32)
 }
 #[derive(Debug)]
 pub struct App {
@@ -15,6 +17,7 @@ pub struct App {
     image_flow: gtk::FlowBox,
     sender: Sender<Action>,
     receiver: RefCell<Option<Receiver<Action>>>,
+    source: Source
 }
 
 impl App {
@@ -28,11 +31,13 @@ impl App {
         window.set_application(Some(application));
         window.set_title("壁纸管理器");
         window.show_all();
+        let sender_new = sender.clone();
         let app = App {
             window,
             image_flow,
             sender,
             receiver,
+            source: Source::new(sender_new)
         };
         Rc::new(app)
     }
@@ -47,6 +52,9 @@ impl App {
             Action::SwitchOnline => {}
             Action::SwitchLocal => {}
             Action::SwitchColor => {}
+            Action::ShowImage(path, index) => {
+                println!("{}, {}", path, index);
+            }
         }
         glib::Continue(true)
     }
@@ -61,6 +69,11 @@ impl App {
             application.connect_activate(move |_| {
                 app.window.show_now();
                 app.window.present();
+                let source = app.source.clone();
+                thread::spawn(move ||{
+                    println!("xxxx");
+                    source.get_image("","".to_owned(),0,10,0,0).unwrap();
+                });
             });
         }));
 

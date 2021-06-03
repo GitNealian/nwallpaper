@@ -28,7 +28,7 @@ fn list(query, page, page_size, w, h){
         if response != "" {
             response.replace("{","#{");
             eval("let response = " + response + ";");
-            response = response.map(|x| #{url:x.url,name:x.copyright});
+            response = response.map(|x| #{url:bing() + x.url,name:x.copyright});
             if store.list == () || store.list.len == 0 {
                 store.list = response;
             }else{

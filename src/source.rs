@@ -1,10 +1,13 @@
-use std::{
-    collections::HashMap, error::Error, fmt::Display, fs::File, io::Write, path::Path, thread,
-};
+use std::{collections::HashMap, error::Error, fmt::Display, fs::File, io::Write, path::Path};
 
+use super::app::Action;
+use glib::Sender;
 use rhai::{Engine, Scope};
 
-pub struct Source {}
+#[derive(Debug, Clone)]
+pub struct Source {
+    sender: Sender<Action>,
+}
 #[derive(Debug)]
 pub enum ScriptError {
     ReturnValueNotFound(String),
@@ -34,36 +37,30 @@ impl Source {
         return Ok(engine);
     }
 
-    pub fn new() -> Self {
-        let engine = Self::new_engine().unwrap();
-        Source {}
+    pub(crate) fn new(sender: Sender<Action>) -> Self {
+        Source { sender }
     }
 
-    pub async fn get_image<F>(
+    pub fn get_image(
         &self,
         repository: &str,
         query: String,
-        page: i32,
-        page_size: i32,
-        w: i32,
-        h: i32,
-        callback: &'static F,
-    ) -> Result<i64, Box<dyn Error>>
-    where
-        F: Fn(i32, String) + Send + Sync,
-    {
+        page: i64,
+        page_size: i64,
+        w: i64,
+        h: i64,
+    ) -> Result<i64, Box<dyn Error>> {
         let image_url = self.get_image_url(repository, query, page, page_size, w, h)?;
         // 判断url是否已下载
-        thread::spawn(move || {
-            let mut index = 0;
-            for url in image_url.1 {
-                let image_path = format!("{}", time::get_time().nsec);
-                if let Ok(_) = download_image(&url, &image_path) {
-                    callback(index, image_path);
-                }
-                index = index + 1;
+        let mut index = 0;
+        for url in image_url.1 {
+            let image_path = format!("{}", time::get_time().nsec);
+            if let Ok(_) = download_image(&url, &image_path) {
+                self.sender
+                    .send(Action::ShowImage(image_path, index.clone()));
             }
-        });
+            index = index + 1;
+        }
         return Ok(image_url.0);
     }
 
@@ -71,21 +68,27 @@ impl Source {
         &self,
         repository: &str,
         query: String,
-        page: i32,
-        page_size: i32,
-        w: i32,
-        h: i32,
+        page: i64,
+        page_size: i64,
+        w: i64,
+        h: i64,
     ) -> Result<(i64, Vec<String>), Box<dyn Error>> {
         let engine = Self::new_engine()?;
         let ast = engine
-            .compile_file("source/bing_daily.rhai".into())
+            .compile_file("/home/nealian/桌面/nwallpaper/source/bing_daily.rhai".into())
             .unwrap();
         let mut scope = Scope::new();
         scope.push("store", engine.parse_json("#{}", false).unwrap());
         let rst: rhai::Map =
             engine.call_fn(&mut scope, &ast, "list", (query, page, page_size, w, h))?;
+        print!("{:?}",rst.keys());
         if let Some(total) = rst.get("total") {
             if let Some(l) = rst.get("list") {
+                let a:  Vec<String>= l.clone_cast::<rhai::Array>()
+                        .iter()
+                        .map(|x| x.clone_cast::<String>())
+                        .collect();
+                print!("{:?}\n", total.as_int());
                 Ok((
                     total.as_int()?,
                     l.clone_cast::<rhai::Array>()
