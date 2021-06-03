@@ -1,4 +1,8 @@
+mod app;
+
+use app::App;
 use gdk::EventKey;
+use gdk_pixbuf::Pixbuf;
 use gtk::CellAreaExt;
 use gtk::{false_, prelude::*};
 use std::rc::Rc;
@@ -47,17 +51,32 @@ fn test_set_wallpaper() {
     assert_eq!(status, 0);
 }
 
-fn main() {
+fn main1() {
     if gtk::init().is_err() {
         println!("Failed to initialize GTK.");
         return;
     }
-    let glade_src = include_str!("ui/window.ui");
+    let glade_src =
+        std::fs::read_to_string("/home/nealian/desktop_new/wallpaper/src/ui/window.ui").unwrap();
     // Then we call the Builder call.
-    let builder = gtk::Builder::from_string(glade_src);
+    let builder = gtk::Builder::from_string(&glade_src);
     let window: gtk::Window = builder.get_object("window").unwrap();
     let search_bar: gtk::SearchBar = builder.get_object("search_bar").unwrap();
-
+    let image_flow: gtk::FlowBox = builder.get_object("image_flow").unwrap();
+    for _ in 0..18 {
+        let image = gtk::Image::from_pixbuf(Some(
+            &Pixbuf::from_file_at_scale(
+                "/home/nealian/desktop_new/wallpaper/placeholder.jpg",
+                192 * 2,
+                108 * 2,
+                false,
+            )
+            .unwrap(),
+        ));
+        image_flow.add(&image);
+        // image_flow.get_child_at_index(0).unwrap().
+    }
+    window.set_resizable(false);
     window.show_all();
     let search_entry: gtk::SearchEntry = builder.get_object("search_entry").unwrap();
     // let search_bar = &search_bar;
@@ -84,4 +103,9 @@ fn main() {
     window.connect_destroy(|_| std::process::exit(0));
     // We start the gtk main loop.
     gtk::main();
+}
+
+fn main() {
+    gtk::init().expect("Error initializing gtk.");
+    App::run();
 }
