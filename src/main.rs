@@ -51,6 +51,7 @@ fn test_set_wallpaper() {
     assert_eq!(status, 0);
 }
 
+#[test]
 fn main1() {
     if gtk::init().is_err() {
         println!("Failed to initialize GTK.");
@@ -62,8 +63,8 @@ fn main1() {
     let builder = gtk::Builder::from_string(&glade_src);
     let window: gtk::Window = builder.get_object("window").unwrap();
     let search_bar: gtk::SearchBar = builder.get_object("search_bar").unwrap();
-    let image_flow: gtk::FlowBox = builder.get_object("image_flow").unwrap();
-    for _ in 0..18 {
+    let image_grid: gtk::Grid = builder.get_object("image_grid").unwrap();
+    for i in 0..9 {
         let image = gtk::Image::from_pixbuf(Some(
             &Pixbuf::from_file_at_scale(
                 "/home/nealian/desktop_new/wallpaper/placeholder.jpg",
@@ -73,8 +74,8 @@ fn main1() {
             )
             .unwrap(),
         ));
-        image_flow.add(&image);
-        // image_flow.get_child_at_index(0).unwrap().
+        print!("{}, {} \n", i%3, i/3);
+        image_grid.attach(&image, i%3, i/3, 1, 1);
     }
     window.set_resizable(false);
     window.show_all();
