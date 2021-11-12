@@ -58,11 +58,9 @@ impl Source {
         scope.push("store", engine.parse_json("#{}", false).unwrap());
         let rst: rhai::Map =
             engine.call_fn(&mut scope, &ast, "list", (query, page, page_size, w, h))?;
-        print!("{:?}", rst.keys());
         if let Some(total) = rst.get("total") {
             if let Some(l) = rst.get("list") {
                 let mut index = 0;
-                println!("{}", &total);
                 let items = l.to_owned().cast::<rhai::Array>();
                 self.sender.send(Action::ShowImagePlaceHolder(items.len() as i32)).unwrap();
                 for item in items {
